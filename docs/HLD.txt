@@ -1,0 +1,46 @@
+			
+                        │
+                        │ 		Opens browser
+			|	
+                        │
+                    ┌───▼────────┐
+                    │   Website  │  Shows problems, USER (Coder)
+                    │ (Angular)  │  editor, results
+                    └───┬────────┘
+                        │
+                        │ Submit code
+                        │
+                    ┌───▼───────────┐
+                    │  Web Server   │  Receives code,
+                    │ (Node.js API) │  checks answers
+                    └───┬───────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+        │           ┌───▼───┐       ┌──▼─────┐
+        │           │  Save │       │  Queue │  Send for
+        │           │  Data │       │  Job   │  execution
+        │       (MongoDB)   │   (Kafka/Queue)
+        │                   │           │
+        │               ┌───▼───┐       │
+        │               │ Cache │       │
+        │               │(Redis)│       │
+        │               └───────┘       │
+        │                               │
+        │                           ┌───▼──────────┐
+        │                           │ Code Executor│
+        │                           │(Docker Boxes)│
+        │                           │           	|
+        │                           │ • Run code   │
+        │                           │ • Test it    │
+        │                           │ • Send back  │
+        │                           │  result      │
+        │                           └───┬──────────┘
+        │                               │
+        └───────────────────┬───────────┘
+                            │ Results
+                            │
+                    ┌───────▼────────┐
+                    │  Show to User  │  "Your code is correct!"
+                    │  Live Updates  │  or "Wrong answer"
+                    └────────────────┘
