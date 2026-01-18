@@ -13,6 +13,8 @@ const globalRateLimiter = rateLimit({
   message: 'Too many requests, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.ip === '::1', // Skip rate limit for localhost
+  keyGenerator: (req) => req.ip, // Use X-Forwarded-For header when behind proxy
 });
 
 const authRateLimiter = rateLimit({
