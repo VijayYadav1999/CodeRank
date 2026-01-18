@@ -22,15 +22,6 @@ const languageConfigs = {
     runCommand: (filename, input) =>
       input ? `node "${filename}" < input.txt` : `node "${filename}"`,
   },
-  java: {
-    ext: '.java',
-    runCommand: (filename, input) => {
-      const className = path.basename(filename, '.java');
-      return input
-        ? `javac "${filename}" && java -cp . ${className} < input.txt`
-        : `javac "${filename}" && java -cp . ${className}`;
-    },
-  },
   cpp: {
     ext: '.cpp',
     runCommand: (filename, input) => {
@@ -40,15 +31,6 @@ const languageConfigs = {
       return input
         ? `g++ -o "${execFile}" "${filename}" && ${execCmd} < input.txt`
         : `g++ -o "${execFile}" "${filename}" && ${execCmd}`;
-    },
-  },
-  csharp: {
-    ext: '.cs',
-    runCommand: (filename, input) => {
-      const execFile = filename.replace('.cs', '.exe');
-      return input
-        ? `mcs "${filename}" -out:"${execFile}" && mono "${execFile}" < input.txt`
-        : `mcs "${filename}" -out:"${execFile}" && mono "${execFile}"`;
     },
   },
 };

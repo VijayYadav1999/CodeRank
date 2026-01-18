@@ -1,18 +1,12 @@
-FROM node:18
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Update packages
-RUN apt-get update && apt-get install -y \
-    default-jdk-headless \
+# Install build tools & compilers (Alpine Linux)
+RUN apk add --no-cache \
     g++ \
     python3 \
-    mono-complete \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Verify compilers are installed
-RUN which javac && which mcs && which g++ && which python3
+    make
 
 # Copy package files
 COPY package*.json ./
