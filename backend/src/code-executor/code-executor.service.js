@@ -34,11 +34,10 @@ const languageConfigs = {
     runCommand: (filename, input) => {
       const execFile = filename.replace('.cpp', '');
       const isWindows = process.platform === 'win32';
-      const baseName = path.basename(execFile);
-      const execCmd = isWindows ? `"${baseName}.exe"` : `./${baseName}`;
+      const execCmd = isWindows ? `"${execFile}.exe"` : `"${execFile}"`;
       return input
-        ? `g++ -o "${baseName}" "${filename}" && ${execCmd} < input.txt`
-        : `g++ -o "${baseName}" "${filename}" && ${execCmd}`;
+        ? `g++ -o "${execFile}" "${filename}" && ${execCmd} < input.txt`
+        : `g++ -o "${execFile}" "${filename}" && ${execCmd}`;
     },
   },
   csharp: {
