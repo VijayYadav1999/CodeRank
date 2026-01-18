@@ -1,6 +1,26 @@
-FROM node:18-alpine
+FROM node:18
 
 WORKDIR /app
+
+# Install Java
+RUN apt-get update && \
+    apt-get install -y default-jdk && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Mono for C#
+RUN apt-get update && \
+    apt-get install -y mono-complete && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install GCC for C++
+RUN apt-get update && \
+    apt-get install -y g++ && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Python
+RUN apt-get update && \
+    apt-get install -y python3 && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
