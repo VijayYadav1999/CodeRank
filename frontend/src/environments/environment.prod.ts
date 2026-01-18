@@ -1,6 +1,6 @@
 // Environment configuration for production
 export const environment = {
   production: true,
-  apiUrl: 'https://coderank-api.onrender.com/api/v1',
-  wsUrl: 'wss://coderank-api.onrender.com',
+  apiUrl: 'https://coderank-mdwd.onrender.com/api/v1',
+  wsUrl: 'wss://coderank-mdwd.onrender.com',
 };
