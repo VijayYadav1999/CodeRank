@@ -23,6 +23,9 @@ class ApiGateway {
   }
 
   setupMiddleware() {
+    // Trust proxy - required for Render/production environments
+    this.app.set('trust proxy', true);
+
     // Security middleware
     this.app.use(helmet());
     this.app.use(cors({
