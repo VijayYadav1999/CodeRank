@@ -2,7 +2,13 @@
  * Application Entry Point
  */
 
-require('dotenv').config({ path: require('path').join(process.cwd(), '.env') });
+// Load environment variables from .env file if it exists
+// On production (Render), environment variables are set directly
+try {
+  require('dotenv').config({ path: require('path').join(process.cwd(), '.env') });
+} catch (error) {
+  // .env file not found - this is expected in production
+}
 
 const path = require('path');
 const { config } = require('../config/config');
