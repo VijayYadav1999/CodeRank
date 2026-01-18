@@ -2,25 +2,17 @@ FROM node:18
 
 WORKDIR /app
 
-# Install Java
-RUN apt-get update && \
-    apt-get install -y default-jdk && \
-    rm -rf /var/lib/apt/lists/*
+# Update packages
+RUN apt-get update && apt-get install -y \
+    default-jdk-headless \
+    g++ \
+    python3 \
+    mono-complete \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Mono for C#
-RUN apt-get update && \
-    apt-get install -y mono-complete && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install GCC for C++
-RUN apt-get update && \
-    apt-get install -y g++ && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Python
-RUN apt-get update && \
-    apt-get install -y python3 && \
-    rm -rf /var/lib/apt/lists/*
+# Verify compilers are installed
+RUN which javac && which mcs && which g++ && which python3
 
 # Copy package files
 COPY package*.json ./

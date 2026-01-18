@@ -24,9 +24,11 @@ const languageConfigs = {
   },
   java: {
     ext: '.java',
-    runCommand: (filename) => {
+    runCommand: (filename, input) => {
       const className = path.basename(filename, '.java');
-      return `javac "${filename}" && java -cp . ${className}`;
+      return input
+        ? `javac "${filename}" && java -cp . ${className} < input.txt`
+        : `javac "${filename}" && java -cp . ${className}`;
     },
   },
   cpp: {
