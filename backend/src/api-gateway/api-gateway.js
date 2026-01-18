@@ -48,6 +48,20 @@ class ApiGateway {
   }
 
   setupRoutes() {
+    // Root route
+    this.app.get('/', (_req, res) => {
+      res.status(200).json(ApiResponse.success({
+        message: 'CodeRank API Server',
+        version: '1.0.0',
+        status: 'running',
+        endpoints: {
+          health: '/health',
+          auth: '/api/v1/auth',
+          code: '/api/v1/code'
+        }
+      }));
+    });
+
     // Health check
     this.app.get('/health', (_req, res) => {
       res.status(200).json(ApiResponse.success({ status: 'ok' }));
