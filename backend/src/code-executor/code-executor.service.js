@@ -22,13 +22,14 @@ const languageConfigs = {
     runCommand: (filename, input) =>
       input ? `node "${filename}" < input.txt` : `node "${filename}"`,
   },
-  java: {
-    ext: '.java',
-    runCommand: (filename) => {
-      const className = path.basename(filename, '.java');
-      return `javac "${filename}" && java -cp . ${className}`;
-    },
-  },
+  // Java disabled - javac not available on production server
+  // java: {
+  //   ext: '.java',
+  //   runCommand: (filename) => {
+  //     const className = path.basename(filename, '.java');
+  //     return `javac "${filename}" && java -cp . ${className}`;
+  //   },
+  // },
   cpp: {
     ext: '.cpp',
     runCommand: (filename, input) => {
@@ -40,11 +41,12 @@ const languageConfigs = {
         : `g++ -o "${execFile}" "${filename}" && ${execCmd}`;
     },
   },
-  csharp: {
-    ext: '.cs',
-    runCommand: (filename, input) =>
-      input ? `csc "${filename}" && program.exe < input.txt` : `csc "${filename}"`,
-  },
+  // C# disabled - not available on production server (requires .NET runtime)
+  // csharp: {
+  //   ext: '.cs',
+  //   runCommand: (filename, input) =>
+  //     input ? `csc "${filename}" && program.exe < input.txt` : `csc "${filename}"`,
+  // },
 };
 
 class CodeExecutor {
