@@ -28,9 +28,17 @@ class ApiGateway {
 
     // Security middleware
     this.app.use(helmet());
+    
+    // CORS configuration
+    const corsOrigin = config.isDevelopment() 
+      ? '*' 
+      : (process.env.CORS_ORIGIN || 'https://code-rank.vercel.app');
+    
     this.app.use(cors({
-      origin: config.isDevelopment() ? '*' : process.env.CORS_ORIGIN,
+      origin: corsOrigin,
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
     }));
 
     // Body parser
