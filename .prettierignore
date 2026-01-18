@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.local
+*.log
+package-lock.json
+yarn.lock
+.next/
+.nuxt/
+out/
+.git/
+.DS_Store

@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:6-alpine
+    container_name: coderank-mongo-prod
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+      MONGO_INITDB_DATABASE: coderank
+    volumes:
+      - mongo_data_prod:/data/db
+    networks:
+      - coderank-network-prod
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.prod
+    container_name: coderank-backend-prod
+    restart: always
+    ports:
+      - "${API_GATEWAY_PORT}:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_GATEWAY_PORT: 5000
+      MONGODB_URI: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongo:27017/coderank?authSource=admin
+      JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: info
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - backend_logs:/app/logs
+    networks:
+      - coderank-network-prod
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mongo_data_prod:
+    driver: local
+  backend_logs:
+    driver: local
+
+networks:
+  coderank-network-prod:
+    driver: bridge
