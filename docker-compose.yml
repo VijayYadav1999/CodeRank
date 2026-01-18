@@ -1,0 +1,74 @@
+version: '3.9'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7
+    container_name: coderank-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: coderank
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - coderank-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.dev
+    container_name: coderank-backend
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      MONGODB_URI: mongodb://mongo:27017/coderank
+      JWT_SECRET: dev-secret-key-change-in-production
+      LOG_LEVEL: debug
+      CORS_ORIGIN: http://localhost:4200
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/config:/app/config
+      - /app/node_modules
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - coderank-network
+    command: npm run dev
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: docker/Dockerfile.dev
+    container_name: coderank-frontend
+    ports:
+      - "4200:4200"
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/angular.json:/app/angular.json
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - coderank-network
+    command: ng serve --host 0.0.0.0 --port 4200 --poll 2000
+
+volumes:
+  mongo-data:
+
+networks:
+  coderank-network:
+    driver: bridge
