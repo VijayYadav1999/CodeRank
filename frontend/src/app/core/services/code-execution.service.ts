@@ -51,18 +51,23 @@ export class CodeExecutionService {
   constructor(private http: HttpClient) {}
 
   execute(request: ExecuteCodeRequest): Observable<ExecutionResult> {
-    return this.http.post<CodeExecutionResponse>(`${this.apiUrl}/execute`, request).pipe(
-      map((response: CodeExecutionResponse) => response.data),
-    );
+    return this.http
+      .post<CodeExecutionResponse>(`${this.apiUrl}/execute`, request)
+      .pipe(map((response: CodeExecutionResponse) => response.data));
   }
 
   getHistory(page: number = 1, limit: number = 10): Observable<{ submissions: CodeSubmission[] }> {
     return this.http.get<{ submissions: CodeSubmission[] }>(
-      `${this.apiUrl}/history?page=${page}&limit=${limit}`,
+      `${this.apiUrl}/history?page=${page}&limit=${limit}`
     );
   }
 
   getSubmission(submissionId: string): Observable<CodeSubmission> {
-    return this.http.get<CodeSubmission>(`${this.apiUrl}/submission/${submissionId}`);
+    return this.http.get<any>(`${this.apiUrl}/submission/${submissionId}`).pipe(
+      map((response: any) => {
+        // Handle both direct response and wrapped response
+        return response.data || response;
+      })
+    );
   }
 }

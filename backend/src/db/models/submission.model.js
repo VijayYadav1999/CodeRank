@@ -46,7 +46,7 @@ const codeSubmissionSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'executing', 'completed', 'failed'],
+      enum: ['pending', 'queued', 'executing', 'completed', 'failed'],
       default: 'pending',
     },
   },

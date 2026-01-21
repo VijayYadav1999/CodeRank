@@ -29,6 +29,9 @@ class Config {
       timeout: parseInt(process.env.CODE_EXECUTOR_TIMEOUT || '5000', 10),
       maxMemory: process.env.MAX_MEMORY || '512m',
       maxCpu: parseFloat(process.env.MAX_CPU || '1'),
+      maxConcurrentExecutions: parseInt(process.env.MAX_CONCURRENT_EXECUTIONS || '10', 10),
+      maxExecutionTime: parseInt(process.env.EXECUTOR_MAX_EXECUTION_TIME || '30000', 10),
+      maxMemoryPerExecution: parseInt(process.env.MAX_MEMORY_PER_EXECUTION || '256', 10),
     };
 
     this.rateLimit = {

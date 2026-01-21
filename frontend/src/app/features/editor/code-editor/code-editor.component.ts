@@ -318,7 +318,9 @@ export class CodeEditorComponent implements OnInit {
     }
 
     this.executing = true;
-    const startTime = Date.now();
+    this.output = '';
+    this.error = '';
+    this.executionTime = 0;
 
     this.codeExecutionService
       .execute({
@@ -328,15 +330,47 @@ export class CodeEditorComponent implements OnInit {
       })
       .subscribe({
         next: (result: any) => {
-          this.output = result.output;
-          this.error = result.error || '';
-          this.executionTime = result.executionTime;
-          this.executing = false;
+          // Result contains submissionId instead of direct output
+          if (result.submissionId) {
+            // Poll for results
+            this.pollForResults(result.submissionId);
+          }
         },
         error: (err: any) => {
           this.error = err.error?.message || 'Execution failed';
           this.executing = false;
         },
       });
+  }
+
+  private pollForResults(submissionId: string, attempts = 0): void {
+    const maxAttempts = 60; // Max 60 seconds (1 second interval)
+
+    if (attempts > maxAttempts) {
+      this.error = 'Execution timeout - taking too long';
+      this.executing = false;
+      return;
+    }
+
+    setTimeout(() => {
+      this.codeExecutionService.getSubmission(submissionId).subscribe({
+        next: (result: any) => {
+          if (result.status === 'completed' || result.status === 'failed') {
+            // Execution completed
+            this.output = result.output || '';
+            this.error = result.error || '';
+            this.executionTime = result.executionTime || 0;
+            this.executing = false;
+          } else {
+            // Still executing, poll again
+            this.pollForResults(submissionId, attempts + 1);
+          }
+        },
+        error: (err: any) => {
+          this.error = err.error?.message || 'Failed to fetch results';
+          this.executing = false;
+        },
+      });
+    }, 500); // Poll every 500ms
   }
 }
