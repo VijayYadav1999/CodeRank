@@ -46,42 +46,46 @@ export class AuthService {
     username: string,
     password: string,
     firstName: string,
-    lastName: string,
+    lastName: string
   ): Observable<AuthData> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, {
-      email,
-      username,
-      password,
-      firstName,
-      lastName,
-    }).pipe(
-      map((response: AuthResponse) => {
-        const { user, token } = response.data;
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        this.currentUserSubject.next(user);
-        return { user, token };
-      }),
-    );
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/register`, {
+        email,
+        username,
+        password,
+        firstName,
+        lastName,
+      })
+      .pipe(
+        map((response: AuthResponse) => {
+          const { user, token } = response.data;
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+          return { user, token };
+        })
+      );
   }
 
   login(email: string, password: string): Observable<AuthData> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, {
-      email,
-      password,
-    }).pipe(
-      map((response: AuthResponse) => {
-        console.log('[AuthService] Full response:', response);
-        console.log('[AuthService] Response data:', response.data);
-        const { user, token } = response.data;
-        console.log('[AuthService] Token:', token);
-        console.log('[AuthService] User:', user);
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        this.currentUserSubject.next(user);
-        return { user, token };
-      }),
-    );
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/login`, {
+        email,
+        password,
+      })
+      .pipe(
+        map((response: AuthResponse) => {
+          console.log('[AuthService] Full response:', response);
+          console.log('[AuthService] Response data:', response.data);
+          const { user, token } = response.data;
+          console.log('[AuthService] Token:', token);
+          console.log('[AuthService] User:', user);
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+          return { user, token };
+        })
+      );
   }
 
   logout(): void {
@@ -94,7 +98,17 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-  getCurrentUser(): User | null {
+  /**
+   * Get current user as observable
+   */
+  getCurrentUser(): Observable<User | null> {
+    return this.currentUser$;
+  }
+
+  /**
+   * Get current user synchronously (for dashboard)
+   */
+  getCurrentUserSync(): User | null {
     return this.currentUserSubject.value;
   }
 

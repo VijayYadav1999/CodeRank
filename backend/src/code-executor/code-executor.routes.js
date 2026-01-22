@@ -23,6 +23,13 @@ codeExecutorRouter.get(
   (req, res, next) => codeExecutorController.getHistory(req, res, next),
 );
 
+// Alias for /history endpoint
+codeExecutorRouter.get(
+  '/submissions',
+  authMiddleware,
+  (req, res, next) => codeExecutorController.getHistory(req, res, next),
+);
+
 codeExecutorRouter.get(
   '/submission/:submissionId',
   authMiddleware,

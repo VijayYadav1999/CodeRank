@@ -70,4 +70,11 @@ export class CodeExecutionService {
       })
     );
   }
+
+  /**
+   * Get all submissions for the current user
+   */
+  getSubmissions(page: number = 1, limit: number = 20): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/history?page=${page}&limit=${limit}`);
+  }
 }
