@@ -144,7 +144,9 @@ export class AuthService {
           this.setCookies(token, user);
           localStorage.setItem('token', token);
           localStorage.setItem('user', JSON.stringify(user));
+          // Update subject immediately after setting all storage
           this.currentUserSubject.next(user);
+          console.log('[AuthService] Google login successful, user state updated:', user);
           return { user, token };
         })
       );

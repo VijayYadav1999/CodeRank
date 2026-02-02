@@ -34,7 +34,7 @@ export class NoAuthGuard implements CanActivate {
 }
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
   {
     path: 'auth',
     children: [
@@ -53,4 +53,5 @@ export const routes: Routes = [
       { path: '', redirectTo: 'editor', pathMatch: 'full' },
     ],
   },
+  { path: '**', redirectTo: 'auth/login', pathMatch: 'full' },
 ];

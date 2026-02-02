@@ -2,7 +2,7 @@
  * Register Component (Standalone)
  */
 
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, NgZone } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -29,7 +29,8 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +60,9 @@ export class RegisterComponent implements OnInit, AfterViewInit {
 
     this.authService.register(email, username, password, firstName, lastName).subscribe({
       next: () => {
-        this.router.navigate(['/dashboard/editor']);
+        this.ngZone.run(() => {
+          this.router.navigate(['/dashboard/editor']);
+        });
       },
       error: (error: any) => {
         this.error = error.error?.message || error.error?.error?.message || 'Registration failed';
@@ -89,7 +92,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
           theme: 'outline',
           size: 'large',
           text: 'signup_with',
-          width: '100%',
+          width: '300',
         });
         this.googleInitialized = true;
       } catch (error) {
@@ -131,13 +134,17 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     this.authService.googleLogin(response.credential).subscribe({
       next: (data) => {
         console.log('Google sign-up successful:', data);
-        setTimeout(() => {
-          this.router.navigate(['/dashboard/editor']).catch((err) => {
-            console.error('Navigation error:', err);
-            this.error = 'Sign-up successful but navigation failed';
-            this.loading = false;
-          });
-        }, 500);
+        // Run navigation inside Angular zone to ensure change detection
+        this.ngZone.run(() => {
+          // Add small delay to ensure all state is updated before navigation
+          setTimeout(() => {
+            this.router.navigate(['/dashboard/editor']).catch((err) => {
+              console.error('Navigation error:', err);
+              this.error = 'Sign-up successful but navigation failed';
+              this.loading = false;
+            });
+          }, 100);
+        });
       },
       error: (error: any) => {
         console.error('Google sign-up error:', error);

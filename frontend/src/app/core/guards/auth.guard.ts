@@ -16,14 +16,29 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    // Check token first
     const token = this.authService.getToken();
-    const user = this.authService.getCurrentUserSync();
+    if (!token) {
+      this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
+      return false;
+    }
 
-    if (token && user) {
+    // If token exists, check user synchronously first
+    let user = this.authService.getCurrentUserSync();
+
+    // If user not immediately available, try to load from storage
+    if (!user) {
+      // Give it a moment for user data to load from storage
+      setTimeout(() => {
+        user = this.authService.getCurrentUserSync();
+        if (!user) {
+          this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
+        }
+      }, 10);
+      // Allow navigation to proceed - user will load
       return true;
     }
 
-    this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
-    return false;
+    return true;
   }
 }

@@ -23,7 +23,7 @@ const globalRateLimiter = rateLimit({
 
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  max: 20, // Limit each IP to 20 requests per windowMs (increased for development)
   message: 'Too many login attempts, please try again later',
   skip: (req) => req.ip === '::1' || req.ip === '127.0.0.1',
   keyGenerator: (req) => {
