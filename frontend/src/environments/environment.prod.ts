@@ -3,4 +3,5 @@ export const environment = {
   production: true,
   apiUrl: 'https://coderank-mdwd.onrender.com/api/v1',
   wsUrl: 'wss://coderank-mdwd.onrender.com',
+  googleClientId: '35723915900-qo52cr3l8l2valbq7irnv5s6p8v5f16h.apps.googleusercontent.com',
 };

@@ -82,6 +82,44 @@ class AuthController {
       next(error);
     }
   }
+
+  /**
+   * Google OAuth Authentication
+   * Handles sign-in and sign-up with Google
+   */
+  async googleAuth(req, res, next) {
+    try {
+      const { googleToken } = req.body;
+
+      if (!googleToken) {
+        return res.status(400).json(
+          ApiResponse.error('Google token is required'),
+        );
+      }
+
+      // Verify and process Google token
+      const result = await authService.googleAuth(googleToken);
+
+      return res.status(200).json(
+        ApiResponse.success(
+          {
+            user: {
+              id: result.user._id,
+              email: result.user.email,
+              username: result.user.username,
+              firstName: result.user.firstName,
+              lastName: result.user.lastName,
+            },
+            token: result.token,
+            isNewUser: result.isNewUser,
+          },
+          result.isNewUser ? 'Account created successfully' : 'Login successful',
+        ),
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = { authController: new AuthController() };

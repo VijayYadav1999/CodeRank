@@ -20,4 +20,9 @@ authRouter.post('/refresh', (req, res, next) =>
   authController.refreshToken(req, res, next),
 );
 
+// Google OAuth endpoint
+authRouter.post('/google', authRateLimiter, (req, res, next) =>
+  authController.googleAuth(req, res, next),
+);
+
 module.exports = { authRouter };

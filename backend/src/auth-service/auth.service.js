@@ -127,6 +127,103 @@ class AuthService {
       throw new AuthenticationError('Failed to refresh token');
     }
   }
+
+  async googleAuth(googleToken) {
+    try {
+      if (!googleToken) {
+        throw new ValidationError('Google token is required');
+      }
+
+      const { OAuth2Client } = require('google-auth-library');
+      
+      // Validate Google Client ID is configured
+      if (!config.google.clientId || config.google.clientId.trim() === '') {
+        logger.error('Google Client ID is not configured. Please set GOOGLE_CLIENT_ID environment variable.');
+        throw new AuthenticationError('Google OAuth is not properly configured on the server. Please contact support.');
+      }
+
+      const client = new OAuth2Client(config.google.clientId);
+
+      // Verify the token
+      const ticket = await client.verifyIdToken({
+        idToken: googleToken,
+        audience: config.google.clientId,
+      });
+
+      const payload = ticket.getPayload();
+      const { email, name, given_name, family_name, picture, email_verified } = payload;
+
+      if (!email) {
+        throw new ValidationError('Email not provided by Google');
+      }
+
+      if (!email_verified) {
+        throw new ValidationError('Email not verified by Google');
+      }
+
+      // Find or create user
+      let user = await User.findOne({ email });
+      let isNewUser = false;
+
+      if (!user) {
+        // Create new user from Google profile
+        const generatedUsername = email.split('@')[0] + '_' + Math.random().toString(36).slice(2, 9);
+        
+        user = new User({
+          email,
+          username: generatedUsername,
+          firstName: given_name || name?.split(' ')[0] || 'User',
+          lastName: family_name || name?.split(' ')[1] || '',
+          profilePicture: picture,
+          isGoogleAuth: true,
+          isActive: true,
+        });
+
+        try {
+          await user.save();
+          logger.info(`New user created via Google: ${email}`);
+          isNewUser = true;
+        } catch (saveError) {
+          logger.error(`Failed to save Google user: ${email}`, saveError);
+          // If username conflict, try alternative
+          if (saveError.code === 11000) {
+            user.username = email.split('@')[0] + '_' + Date.now();
+            await user.save();
+            logger.info(`User created with alternative username: ${user.username}`);
+          } else {
+            throw saveError;
+          }
+        }
+      } else {
+        // Existing user
+        if (!user.isActive) {
+          throw new AuthenticationError('Account is inactive');
+        }
+        // Update profile picture if available
+        if (picture && user.profilePicture !== picture) {
+          user.profilePicture = picture;
+          await user.save();
+        }
+        logger.info(`User logged in via Google: ${email}`);
+      }
+
+      // Generate JWT token
+      const token = this.generateToken({
+        userId: user._id.toString(),
+        email: user.email,
+        role: user.role,
+      });
+
+      return { user, token, isNewUser };
+    } catch (error) {
+      logger.error('Google authentication error', error);
+      // Re-throw with appropriate error type
+      if (error instanceof ValidationError || error instanceof AuthenticationError) {
+        throw error;
+      }
+      throw new AuthenticationError('Google authentication failed: ' + error.message);
+    }
+  }
 }
 
 module.exports = { authService: new AuthService() };

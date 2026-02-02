@@ -26,7 +26,10 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function() {
+        // Password is only required for non-Google auth users
+        return !this.isGoogleAuth;
+      },
       minlength: 6,
       select: false,
     },
@@ -39,6 +42,14 @@ const userSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+    },
+    isGoogleAuth: {
+      type: Boolean,
+      default: false,
+    },
+    profilePicture: {
+      type: String,
+      default: null,
     },
     avatar: {
       type: String,

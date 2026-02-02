@@ -25,6 +25,13 @@ class Config {
       expiry: process.env.JWT_EXPIRY || '7d',
     };
 
+    // Google OAuth Configuration
+    this.google = {
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      supportedDomains: (process.env.GOOGLE_ALLOWED_DOMAINS || 'localhost:4200,code-rank.vercel.app').split(','),
+    };
+
     this.executor = {
       timeout: parseInt(process.env.CODE_EXECUTOR_TIMEOUT || '5000', 10),
       maxMemory: process.env.MAX_MEMORY || '512m',

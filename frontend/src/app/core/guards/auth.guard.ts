@@ -12,14 +12,14 @@ import { AuthService } from '../services/auth.service';
 export class AuthGuard implements CanActivate {
   constructor(
     private authService: AuthService,
-    private router: Router,
+    private router: Router
   ) {}
 
-  canActivate(
-    _route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot,
-  ): boolean {
-    if (this.authService.isAuthenticated()) {
+  canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    const token = this.authService.getToken();
+    const user = this.authService.getCurrentUserSync();
+
+    if (token && user) {
       return true;
     }
 

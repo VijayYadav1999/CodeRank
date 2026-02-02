@@ -1,0 +1,58 @@
+<div class="history-container">
+  <div class="history-header">
+    <h1>Submission History</h1>
+    <button (click)="refreshSubmissions()" class="refresh-btn">🔄 Refresh</button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading submissions...</div>
+
+  <div *ngIf="error" class="error-message">
+    <span>{{ error }}</span>
+    <button (click)="dismissError()" class="close-btn">×</button>
+  </div>
+
+  <div *ngIf="!loading && submissions.length === 0 && !error" class="loading">
+    No submissions yet
+  </div>
+
+  <div *ngIf="!loading && submissions.length > 0" class="submissions-list">
+    <div *ngFor="let submission of submissions; let i = index" class="submission-item">
+      <div class="submission-header" (click)="toggleSubmission(i)">
+        <div class="submission-info">
+          <span class="language-badge">{{ submission.language }}</span>
+          <span [ngClass]="'status-badge ' + submission.status">
+            {{ submission.status }}
+          </span>
+          <span class="submission-date">{{ formatDate(submission.createdAt) }}</span>
+        </div>
+        <button
+          class="expand-btn"
+          (click)="toggleSubmission(i); $event.stopPropagation()"
+        >
+          {{ expandedIndex === i ? '▼' : '▶' }}
+        </button>
+      </div>
+
+      <div *ngIf="expandedIndex === i" class="submission-details expanded">
+        <strong>Code:</strong>
+        <pre class="code-block">{{ submission.code }}</pre>
+        <button (click)="copyCode(submission.code)" class="copy-btn">📋 Copy Code</button>
+
+        <div *ngIf="submission.output" class="output-block">
+          <strong>Output:</strong>
+          <pre>{{ submission.output }}</pre>
+        </div>
+
+        <div *ngIf="submission.error" class="error-block">
+          <strong>Error:</strong>
+          <pre>{{ submission.error }}</pre>
+        </div>
+
+        <div class="execution-stats">
+          <span>⏱️ Execution Time: {{ submission.executionTime }}ms</span>
+          <span>💾 Memory: {{ submission.memory }}MB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

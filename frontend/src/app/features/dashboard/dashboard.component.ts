@@ -60,7 +60,9 @@ import { AuthService } from '@core/services/auth.service';
         display: flex;
         flex-direction: column;
         height: 100vh;
+        width: 100%;
         background: #f5f5f5;
+        overflow: hidden;
       }
 
       .dashboard-nav {
@@ -72,6 +74,8 @@ import { AuthService } from '@core/services/auth.service';
         color: white;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         gap: 30px;
+        flex-shrink: 0;
+        min-height: 60px;
       }
 
       .nav-brand h2 {
@@ -79,6 +83,7 @@ import { AuthService } from '@core/services/auth.service';
         color: #3498db;
         font-size: 1.8rem;
         letter-spacing: 1px;
+        flex-shrink: 0;
       }
 
       .nav-links {
@@ -97,6 +102,7 @@ import { AuthService } from '@core/services/auth.service';
         border-radius: 4px;
         transition: all 0.3s;
         font-weight: 500;
+        white-space: nowrap;
       }
 
       .nav-link:hover {
@@ -108,7 +114,7 @@ import { AuthService } from '@core/services/auth.service';
         display: flex;
         align-items: center;
         gap: 15px;
-        margin-left: auto;
+        flex-shrink: 0;
       }
 
       .user-name {
@@ -125,6 +131,7 @@ import { AuthService } from '@core/services/auth.service';
         cursor: pointer;
         font-weight: 600;
         transition: background 0.3s;
+        white-space: nowrap;
       }
 
       .logout-btn:hover {
@@ -134,7 +141,9 @@ import { AuthService } from '@core/services/auth.service';
       .dashboard-content {
         flex: 1;
         overflow-y: auto;
-        padding: 20px;
+        overflow-x: hidden;
+        padding: 0;
+        width: 100%;
       }
 
       @media (max-width: 768px) {
@@ -142,6 +151,7 @@ import { AuthService } from '@core/services/auth.service';
           flex-direction: column;
           gap: 15px;
           padding: 15px;
+          min-height: auto;
         }
 
         .nav-links {

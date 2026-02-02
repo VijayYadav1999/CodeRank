@@ -1,0 +1,97 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>CodeRank</h1>
+    <h2>Create Account</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input
+          type="text"
+          id="firstName"
+          formControlName="firstName"
+          placeholder="Enter your first name"
+        />
+        <span class="error" *ngIf="registerForm.get('firstName')?.hasError('required')">
+          First name is required
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input
+          type="text"
+          id="lastName"
+          formControlName="lastName"
+          placeholder="Enter your last name"
+        />
+        <span class="error" *ngIf="registerForm.get('lastName')?.hasError('required')">
+          Last name is required
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="Enter your email"
+        />
+        <span class="error" *ngIf="registerForm.get('email')?.hasError('required')">
+          Email is required
+        </span>
+        <span class="error" *ngIf="registerForm.get('email')?.hasError('email')">
+          Please enter a valid email
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          placeholder="Choose a username"
+        />
+        <span class="error" *ngIf="registerForm.get('username')?.hasError('required')">
+          Username is required
+        </span>
+        <span class="error" *ngIf="registerForm.get('username')?.hasError('minlength')">
+          Username must be at least 3 characters
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="Enter your password"
+        />
+        <span class="error" *ngIf="registerForm.get('password')?.hasError('required')">
+          Password is required
+        </span>
+        <span class="error" *ngIf="registerForm.get('password')?.hasError('minlength')">
+          Password must be at least 6 characters
+        </span>
+      </div>
+
+      <button type="submit" [disabled]="!registerForm.valid || loading">
+        {{ loading ? 'Creating Account...' : 'Sign Up' }}
+      </button>
+
+      <p class="error" *ngIf="error">{{ error }}</p>
+    </form>
+
+    <div class="divider">
+      <span>OR</span>
+    </div>
+
+    <!-- Google Sign-Up Button -->
+    <div #googleSignUpButton class="google-signup-container"></div>
+
+    <p class="login-link">Already have an account? <a routerLink="/auth/login">Login</a></p>
+  </div>
+</div>

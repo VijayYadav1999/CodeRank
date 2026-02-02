@@ -1,0 +1,64 @@
+<div class="editor-container">
+  <div class="editor-header">
+    <h1>Code Executor</h1>
+  </div>
+
+  <div class="editor-main">
+    <div class="editor-panel">
+      <div class="language-selector">
+        <label for="language">Language:</label>
+        <select id="language" (change)="onLanguageChange($event)">
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="cpp">C++</option>
+        </select>
+      </div>
+
+      <div class="editor-area">
+        <textarea
+          [(ngModel)]="code"
+          placeholder="Write your code here..."
+          class="code-editor"
+        ></textarea>
+      </div>
+
+      <div class="input-area">
+        <label>Input (optional):</label>
+        <textarea
+          [(ngModel)]="input"
+          placeholder="Provide input here..."
+          class="input-textarea"
+        ></textarea>
+      </div>
+
+      <button (click)="executeCode()" [disabled]="executing" class="execute-btn">
+        {{ executing ? 'Executing...' : 'Execute Code' }}
+      </button>
+    </div>
+
+    <div class="output-panel">
+      <div class="output-header">
+        <h3>Output</h3>
+        <span class="execution-time" *ngIf="executionTime">
+          Execution Time: {{ executionTime }}ms
+        </span>
+      </div>
+
+      <div class="output-content">
+        <div *ngIf="output || error" class="result">
+          <div *ngIf="output" class="output">
+            <strong>Output:</strong>
+            <pre>{{ output }}</pre>
+          </div>
+          <div *ngIf="error" class="error-output">
+            <strong>Error:</strong>
+            <pre>{{ error }}</pre>
+          </div>
+        </div>
+        <div *ngIf="!output && !error && !executing" class="placeholder">
+          Execute your code to see results...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

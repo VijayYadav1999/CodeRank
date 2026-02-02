@@ -1,6 +1,6 @@
 /**
  * Authentication Service
- * Manages user authentication state and API calls
+ * Manages user authentication state and API calls with 2-day cookie persistence
  */
 
 import { Injectable } from '@angular/core';
@@ -36,9 +36,56 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private apiUrl = `${environment.apiUrl}/auth`;
+  private readonly TOKEN_KEY = 'auth_token';
+  private readonly USER_KEY = 'auth_user';
+  private readonly COOKIE_EXPIRY_DAYS = 2;
 
   constructor(private http: HttpClient) {
     this.loadUser();
+  }
+
+  /**
+   * Set cookies for 2 days using native browser API
+   */
+  private setCookies(token: string, user: User): void {
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + this.COOKIE_EXPIRY_DAYS);
+    const expiryString = expiryDate.toUTCString();
+
+    document.cookie = `${this.TOKEN_KEY}=${encodeURIComponent(token)}; expires=${expiryString}; path=/`;
+    document.cookie = `${this.USER_KEY}=${encodeURIComponent(JSON.stringify(user))}; expires=${expiryString}; path=/`;
+  }
+
+  /**
+   * Get cookie value by name
+   */
+  private getCookie(name: string): string | null {
+    const nameEQ = name + '=';
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.indexOf(nameEQ) === 0) {
+        return decodeURIComponent(cookie.substring(nameEQ.length));
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get token from cookie or localStorage
+   */
+  private getTokenFromStorage(): string | null {
+    return this.getCookie(this.TOKEN_KEY) || localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Remove all auth data
+   */
+  private clearAllStorage(): void {
+    document.cookie = `${this.TOKEN_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+    document.cookie = `${this.USER_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
   }
 
   register(
@@ -59,6 +106,7 @@ export class AuthService {
       .pipe(
         map((response: AuthResponse) => {
           const { user, token } = response.data;
+          this.setCookies(token, user);
           localStorage.setItem('token', token);
           localStorage.setItem('user', JSON.stringify(user));
           this.currentUserSubject.next(user);
@@ -75,11 +123,25 @@ export class AuthService {
       })
       .pipe(
         map((response: AuthResponse) => {
-          console.log('[AuthService] Full response:', response);
-          console.log('[AuthService] Response data:', response.data);
           const { user, token } = response.data;
-          console.log('[AuthService] Token:', token);
-          console.log('[AuthService] User:', user);
+          this.setCookies(token, user);
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+          return { user, token };
+        })
+      );
+  }
+
+  googleLogin(googleToken: string): Observable<AuthData> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/google`, {
+        googleToken,
+      })
+      .pipe(
+        map((response: AuthResponse) => {
+          const { user, token } = response.data;
+          this.setCookies(token, user);
           localStorage.setItem('token', token);
           localStorage.setItem('user', JSON.stringify(user));
           this.currentUserSubject.next(user);
@@ -89,13 +151,12 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    this.clearAllStorage();
     this.currentUserSubject.next(null);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return this.getTokenFromStorage();
   }
 
   /**
@@ -116,15 +177,25 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  /**
+   * Load user from cookies or localStorage
+   */
   private loadUser(): void {
     try {
-      const user = localStorage.getItem('user');
+      // Try to get from cookie first
+      let user = this.getCookie(this.USER_KEY);
+
+      // Fallback to localStorage
+      if (!user) {
+        user = localStorage.getItem(this.USER_KEY);
+      }
+
       if (user && user !== 'undefined') {
         this.currentUserSubject.next(JSON.parse(user));
       }
     } catch (error) {
-      console.error('Error loading user from localStorage:', error);
-      localStorage.removeItem('user');
+      console.error('Error loading user from storage:', error);
+      this.clearAllStorage();
     }
   }
 }
