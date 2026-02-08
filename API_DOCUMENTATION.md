@@ -181,6 +181,164 @@ curl -X POST http://localhost:5000/api/v1/auth/login \
 
 ---
 
+### 3. Google OAuth Login
+Authenticates user via Google and returns JWT token. If user doesn't exist, a new account is created automatically.
+
+**Endpoint**: `POST /auth/google`
+
+**Headers**:
+```
+Content-Type: application/json
+```
+
+**Request Body**:
+```json
+{
+  "token": "google_id_token_from_frontend"
+}
+```
+
+**Parameters**:
+- `token` (required): Google ID token obtained from Google OAuth 2.0 authentication on frontend
+
+**Success Response** (200 OK - Existing User):
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "507f1f77bcf86cd799439011",
+      "email": "john.doe@gmail.com",
+      "username": "john.doe",
+      "firstName": "John",
+      "lastName": "Doe",
+      "role": "user",
+      "provider": "google",
+      "googleId": "105234567890123456789"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MDdmMWY3N2JjZjg2Y2Q3OTk0MzkwMTEiLCJlbWFpbCI6ImpvaG4uZG9lQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzA1OTkzMDAwfQ.signature"
+  },
+  "message": "Google authentication successful",
+  "timestamp": "2024-01-23T10:30:00Z"
+}
+```
+
+**Success Response** (201 Created - New User):
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "507f1f77bcf86cd799439012",
+      "email": "jane.doe@gmail.com",
+      "username": "jane.doe",
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "role": "user",
+      "provider": "google",
+      "googleId": "109987654321987654321",
+      "createdAt": "2024-01-23T10:30:00Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MDdmMWY3N2JjZjg2Y2Q3OTk0MzkwMTIiLCJlbWFpbCI6ImphbmUuZG9lQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzA1OTkzMDAwfQ.signature"
+  },
+  "message": "User created and authenticated via Google",
+  "timestamp": "2024-01-23T10:30:00Z"
+}
+```
+
+**Error Response** (400 Bad Request - Invalid Token):
+```json
+{
+  "success": false,
+  "error": "Invalid Google token",
+  "statusCode": 400,
+  "timestamp": "2024-01-23T10:30:00Z"
+}
+```
+
+**Error Response** (400 Bad Request - Token Expired):
+```json
+{
+  "success": false,
+  "error": "Google token has expired",
+  "statusCode": 400,
+  "timestamp": "2024-01-23T10:30:00Z"
+}
+```
+
+**Frontend Implementation (Angular)**:
+```typescript
+// In your login component
+import { GoogleSigninButtonModule, SocialAuthService } from '@abacritt/angularx-social-login';
+import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
+
+export class LoginComponent {
+  constructor(
+    private socialAuthService: SocialAuthService,
+    private authService: AuthService
+  ) {}
+
+  googleLogin() {
+    this.socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID).then((user) => {
+      // Send the token to backend
+      this.authService.googleLogin(user.idToken).subscribe(
+        (response) => {
+          // Handle successful login
+          localStorage.setItem('auth_token', response.data.token);
+          // Redirect to dashboard
+        },
+        (error) => {
+          // Handle error
+          console.error('Google login failed', error);
+        }
+      );
+    });
+  }
+}
+```
+
+**Backend Call in Service**:
+```typescript
+// auth.service.ts
+googleLogin(token: string): Observable<any> {
+  return this.http.post(`${this.apiUrl}/auth/google`, { token });
+}
+```
+
+**cURL Example**:
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/google \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFiOTRjNTQ1OGNmZjMwY2QzMzc2YzJkYTlhYzJlODczMDEwYzljOTIiLCJ0eXAiOiJKV1QifQ..."
+  }'
+```
+
+**JavaScript/Node.js Example**:
+```javascript
+const authenticateWithGoogle = async (googleToken) => {
+  const response = await fetch('http://localhost:5000/api/v1/auth/google', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ token: googleToken })
+  });
+  const result = await response.json();
+  
+  if (result.success) {
+    localStorage.setItem('auth_token', result.data.token);
+    console.log('User authenticated:', result.data.user);
+    return result.data;
+  } else {
+    console.error('Authentication failed:', result.error);
+    throw new Error(result.error);
+  }
+};
+```
+
+---
+
 ## Code Execution Endpoints
 
 ### 3. Execute Code
