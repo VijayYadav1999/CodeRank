@@ -1,8 +1,3 @@
-/**
- * HTTP Interceptor Function for API requests
- * Modern standalone-compatible interceptor
- */
-
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
