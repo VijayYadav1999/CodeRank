@@ -21,6 +21,10 @@ yarn.lock
 dist/
 build/
 *.log
+
+# .NET
+bin/
+obj/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
