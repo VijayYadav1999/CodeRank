@@ -205,7 +205,7 @@ public class AuthController : ControllerBase
 
     private string GenerateJwt(string userId, string email, string role)
     {
-        var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? "super-secret-key-for-dev-123456");
+        var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
         var expiry = _config["Jwt:Expiry"] ?? "7d";
 
         var expiresAt = expiry.EndsWith('d')
@@ -234,7 +234,7 @@ public class AuthController : ControllerBase
 
     private ClaimsPrincipal? ValidateToken(string token)
     {
-        var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? "super-secret-key-for-dev-123456");
+        var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
         var handler = new JwtSecurityTokenHandler();
 
         try

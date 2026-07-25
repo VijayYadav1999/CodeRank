@@ -17,7 +17,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Server=localhost,1433;Database=CodeRankDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;";
+    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured. Set it via environment variable or appsettings.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
@@ -28,7 +28,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             errorNumbersToAdd: null);
     }));
 
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "super-secret-key-for-dev-123456";
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key is not configured. Set it via environment variable or appsettings.");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
