@@ -1,5 +1,13 @@
 <div class="auth-container">
-  <div class="auth-card">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Creating your account...</p>
+    </div>
+  </div>
+
+  <div class="auth-card" *ngIf="!loading">
     <h1>CodeRank</h1>
     <h2>Create Account</h2>
 
