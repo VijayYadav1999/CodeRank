@@ -117,12 +117,13 @@ public class CodeController : ControllerBase
         var query = _mongo.CodeSubmissions.Where(s => s.UserId == userId);
         var total = await query.CountAsync();
 
-        var submissions = await query
+        var entities = await query
             .OrderByDescending(s => s.CreatedAt)
             .Skip((page - 1) * limit)
             .Take(limit)
-            .Select(s => MapSubmission(s))
             .ToListAsync();
+
+        var submissions = entities.Select(MapSubmission).ToList();
 
         return Ok(ApiResponse<HistoryResponseData>.Ok(new HistoryResponseData
         {
