@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 using System.Text;
 using System.Text.Json;
 
@@ -27,6 +28,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorNumbersToAdd: null);
     }));
+
+// MongoDB for code submissions
+var mongoConnectionString = builder.Configuration["MongoDB:ConnectionString"]
+    ?? throw new InvalidOperationException("MongoDB:ConnectionString is not configured.");
+var mongoDatabaseName = builder.Configuration["MongoDB:DatabaseName"] ?? "coderank";
+
+builder.Services.AddDbContext<MongoDbContext>(options =>
+    options.UseMongoDB(mongoConnectionString, mongoDatabaseName));
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Jwt:Key is not configured. Set it via environment variable or appsettings.");

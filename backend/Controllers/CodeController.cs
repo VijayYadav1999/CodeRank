@@ -5,6 +5,7 @@ using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 
 namespace backend.Controllers;
 
@@ -13,18 +14,18 @@ namespace backend.Controllers;
 [Authorize]
 public class CodeController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly MongoDbContext _mongo;
     private readonly CodeExecutionService _executor;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<CodeController> _logger;
 
     public CodeController(
-        AppDbContext context,
+        MongoDbContext mongo,
         CodeExecutionService executor,
         IServiceScopeFactory scopeFactory,
         ILogger<CodeController> logger)
     {
-        _context = context;
+        _mongo = mongo;
         _executor = executor;
         _scopeFactory = scopeFactory;
         _logger = logger;
@@ -51,8 +52,8 @@ public class CodeController : ControllerBase
             Status = "pending"
         };
 
-        _context.CodeSubmissions.Add(submission);
-        await _context.SaveChangesAsync();
+        _mongo.CodeSubmissions.Add(submission);
+        await _mongo.SaveChangesAsync();
 
         _logger.LogInformation("Submission created: {Id}", submission.Id);
 
@@ -64,7 +65,7 @@ public class CodeController : ControllerBase
         _ = Task.Run(async () =>
         {
             using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
             try
             {
@@ -113,7 +114,7 @@ public class CodeController : ControllerBase
     {
         var userId = GetUserId();
 
-        var query = _context.CodeSubmissions.Where(s => s.UserId == userId);
+        var query = _mongo.CodeSubmissions.Where(s => s.UserId == userId);
         var total = await query.CountAsync();
 
         var submissions = await query
@@ -141,9 +142,12 @@ public class CodeController : ControllerBase
         => GetHistory(page, limit);
 
     [HttpGet("submission/{submissionId}")]
-    public async Task<IActionResult> GetSubmission(int submissionId)
+    public async Task<IActionResult> GetSubmission(string submissionId)
     {
-        var submission = await _context.CodeSubmissions.FindAsync(submissionId);
+        if (!ObjectId.TryParse(submissionId, out var objectId))
+            return BadRequest(ApiResponse<object>.Fail("Invalid submission ID"));
+
+        var submission = await _mongo.CodeSubmissions.FindAsync(objectId);
         if (submission is null)
             return NotFound(ApiResponse<object>.Fail("Submission not found"));
 
