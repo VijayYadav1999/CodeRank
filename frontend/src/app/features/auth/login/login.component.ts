@@ -147,7 +147,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.ngZone.run(() => {
-          this.router.navigate(['/dashboard/editor']);
+          this.router.navigate(['/dashboard/editor']).then(() => {
+            this.loading = false;
+          });
         });
       },
       error: (error: any) => {

@@ -22,10 +22,7 @@ export class NoAuthGuard implements CanActivate {
   ) {}
 
   canActivate(): boolean {
-    const token = this.authService.getToken();
-    const user = this.authService.getCurrentUserSync();
-
-    if (token && user) {
+    if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard/editor']);
       return false;
     }

@@ -61,7 +61,9 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     this.authService.register(email, username, password, firstName, lastName).subscribe({
       next: () => {
         this.ngZone.run(() => {
-          this.router.navigate(['/dashboard/editor']);
+          this.router.navigate(['/dashboard/editor']).then(() => {
+            this.loading = false;
+          });
         });
       },
       error: (error: any) => {
