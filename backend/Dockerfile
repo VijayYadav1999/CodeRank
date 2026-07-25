@@ -14,11 +14,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nodejs \
     npm \
     g++ \
+    nginx \
+    wget \
     && ln -sf /usr/bin/python3 /usr/bin/python \
+    && rm -f /etc/nginx/sites-enabled/default \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/publish .
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
 EXPOSE 8080
-ENTRYPOINT ["sh", "-c", "export ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080} && dotnet backend.dll"]
+ENTRYPOINT ["/app/start.sh"]
