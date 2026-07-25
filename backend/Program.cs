@@ -78,6 +78,25 @@ var app = builder.Build();
 app.UseForwardedHeaders();
 app.UseCors("frontend");
 
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = 500;
+        var error = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+        var msg = error?.Error?.Message ?? "Unknown error";
+        var inner = error?.Error?.InnerException?.Message;
+        await context.Response.WriteAsJsonAsync(new
+        {
+            success = false,
+            message = msg,
+            innerError = inner,
+            timestamp = DateTime.UtcNow.ToString("o")
+        });
+    });
+});
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
