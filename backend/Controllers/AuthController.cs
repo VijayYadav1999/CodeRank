@@ -5,6 +5,7 @@ using backend.Data;
 using backend.Models;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -12,6 +13,7 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/v1/auth")]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;

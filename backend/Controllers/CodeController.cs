@@ -4,6 +4,7 @@ using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 
@@ -12,6 +13,7 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/v1/code")]
 [Authorize]
+[EnableRateLimiting("fixed")]
 public class CodeController : ControllerBase
 {
     private readonly MongoDbContext _mongo;
@@ -32,6 +34,7 @@ public class CodeController : ControllerBase
     }
 
     [HttpPost("execute")]
+    [EnableRateLimiting("code-execution")]
     public async Task<IActionResult> Execute(ExecuteCodeRequest request)
     {
         var userId = GetUserId();
