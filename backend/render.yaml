@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: coderank-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Jwt__Key
+        generateValue: true
+      - key: Jwt__Expiry
+        value: "7d"
+      - key: Cors__AllowedOrigin
+        value: "https://code-rank.vercel.app"
+      - key: Google__ClientId
+        value: "35723915900-qo52cr3l8l2valbq7irnv5s6p8v5f16h.apps.googleusercontent.com"
+      - key: Executor__MaxConcurrentExecutions
+        value: "5"
+      - key: Executor__MaxExecutionTimeMs
+        value: "15000"

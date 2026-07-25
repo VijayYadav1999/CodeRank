@@ -1,50 +1,41 @@
 services:
-  # MongoDB Database
-  mongo:
-    image: mongo:7
-    container_name: coderank-mongo
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: coderank-sql
     ports:
-      - "27017:27017"
+      - "1433:1433"
     environment:
-      MONGO_INITDB_DATABASE: coderank
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong@Passw0rd"
     volumes:
-      - mongo-data:/data/db
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"YourStrong@Passw0rd\" -C -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
     networks:
       - coderank-network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  # Backend Service
   backend:
     build:
       context: ./backend
-      dockerfile: docker/Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: coderank-backend
     ports:
-      - "5000:5000"
-    env_file:
-      - ./backend/.env
+      - "5000:8080"
     environment:
-      NODE_ENV: development
-      PORT: 5000
-      MONGODB_URI: mongodb://mongo:27017/coderank
-      LOG_LEVEL: debug
-      CORS_ORIGIN: http://localhost:4200
-    volumes:
-      - ./backend/src:/app/src
-      - ./backend/config:/app/config
-      - /app/node_modules
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=CodeRankDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+      Jwt__Key: development-secret-key-change-me
+      Jwt__Expiry: 7d
+      Cors__AllowedOrigin: http://localhost:4200
     depends_on:
-      mongo:
+      sqlserver:
         condition: service_healthy
     networks:
       - coderank-network
-    command: npm run dev
 
-  # Frontend Service
   frontend:
     build:
       context: ./frontend
@@ -54,11 +45,6 @@ services:
       - "4200:4200"
     environment:
       NODE_ENV: development
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/angular.json:/app/angular.json
-      - ./frontend/tsconfig.json:/app/tsconfig.json
-      - /app/node_modules
     depends_on:
       - backend
     networks:
@@ -66,7 +52,7 @@ services:
     command: ng serve --host 0.0.0.0 --port 4200 --poll 2000
 
 volumes:
-  mongo-data:
+  sqlserver-data:
 
 networks:
   coderank-network:
