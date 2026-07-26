@@ -12,6 +12,8 @@ yarn.lock
 # IDE
 .vscode/
 .idea/
+.vs/
+*.user
 *.swp
 *.swo
 *~
